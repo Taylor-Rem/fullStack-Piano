@@ -1,6 +1,6 @@
 require('dotenv').config();
+const bcrypt = require('bcryptjs');
 const { CONNECTION_STRING } = process.env;
-
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize(CONNECTION_STRING, {
   dialect: 'postgres',
@@ -20,7 +20,7 @@ module.exports = {
         DROP TABLE IF EXISTS users;
         CREATE TABLE users (
           user_id SERIAL PRIMARY KEY,
-          username VARCHAR,
+          user_name VARCHAR,
           hash VARCHAR
         );
         CREATE TABLE song (
@@ -32,7 +32,45 @@ module.exports = {
       )
       .then(() => res.sendStatus(200));
   },
-  getSong: (req, res) => {
-    console.log(res.data);
+  createAccount: (req, res) => {
+    let { username, password } = req.body;
+    username = username.toLowerCase();
+    const salt = bcrypt.genSaltSync(5);
+    const hash = bcrypt.hashSync(password, salt);
+    let dbUser = '';
+    sequelize
+      .query(
+        `
+      SELECT * FROM users WHERE user_name = '${username}'
+      `
+      )
+      .then((dbRes) => {
+        if (JSON.stringify(dbRes[0]) === '[]') {
+          sequelize.query(
+            `
+            INSERT INTO users(user_name, hash) VALUES('${username}', '${hash}')
+            `
+          );
+          res.status(200).send(`user created under username: ${username}`);
+        } else {
+          res.status(200).send('username taken');
+        }
+      });
+  },
+  login: (req, res) => {
+    let { username, password } = req.body;
+    sequelize
+      .query(
+        `
+      SELECT * FROM users WHERE user_name = '${username}'
+      `
+      )
+      .then((dbRes) => {
+        if (bcrypt.compareSync(password, dbRes[0][0].hash)) {
+          res.status(200).send(`logged in under username: ${username}`);
+        } else {
+          res.status(200).send('Wrong password. Please try again');
+        }
+      });
   },
 };

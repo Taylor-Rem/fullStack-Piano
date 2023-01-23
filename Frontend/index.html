@@ -14,10 +14,19 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <form action="login" id="login-signup-form">
+      <label for="username">Username:</label>
+      <input type="text" />
+      <label for="password">Password:</label>
+      <input type="text" />
+      <button id="signup-btn">Sign Up</button>
+      <button id="login-btn">Log In</button>
+    </form>
+    <p id="login-status"></p>
     <div class="body-con">
       <div class="piano-ctrl-con">
         <div class="octave-change">
-          <button>
+          <button id="octave-down">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -34,7 +43,7 @@
             </svg>
           </button>
           <p>Change Octave</p>
-          <button>
+          <button id="octave-up">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -52,14 +61,14 @@
           </button>
         </div>
         <div class="record">
-          <button>
+          <button id="record-btn">
             <svg height="50" width="35">
               <circle cx="25" cy="25" r="15" fill="white" />
             </svg>
           </button>
         </div>
         <div class="play">
-          <button>
+          <button id="play-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="white"

@@ -1,5 +1,4 @@
 let pianoContainer = document.querySelector('.piano-container');
-let btns = document.querySelectorAll('button');
 
 // create synth
 
@@ -27,7 +26,7 @@ const octaveDown = () => {
   }
 };
 // octave down event listeners
-btns[0].addEventListener('click', () => {
+document.querySelector('#octave-down').addEventListener('click', () => {
   octaveDown();
   octaveChange();
 });
@@ -45,7 +44,7 @@ const octaveUp = () => {
   }
 };
 // octave up event listeners
-btns[1].addEventListener('click', () => {
+document.querySelector('#octave-up').addEventListener('click', () => {
   octaveUp();
   octaveChange();
 });
@@ -146,10 +145,10 @@ let time = 0;
 let isPlaying = false;
 
 // start recording - change button icon
-btns[2].addEventListener('click', () => {
+document.querySelector('#record-btn').addEventListener('click', () => {
   if (!isPlaying) {
     recording = !recording;
-    btns[2].innerHTML = recording
+    document.querySelector('#record-btn').innerHTML = recording
       ? '<svg xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" class="w-6 h-6 stop"><path d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>'
       : '<svg height="50" width="35"><circle cx="25" cy="25" r="15" fill="white"/></svg>';
     startTimer();
@@ -219,10 +218,10 @@ document.addEventListener('keyup', (e) => {
   keyPressTime[note] = Date.now() - keyPressTime[note];
 });
 
-btns[3].addEventListener('click', () => {
+document.querySelector('#play-btn').addEventListener('click', () => {
   if (!recording) {
     isPlaying = !isPlaying;
-    btns[3].innerHTML = isPlaying
+    document.querySelector('#play-btn').innerHTML = isPlaying
       ? '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6 stop"><path d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>'
       : '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>';
     if (isPlaying) {
@@ -243,3 +242,33 @@ btns[3].addEventListener('click', () => {
 
 // BACKEND COMS
 let localHost = 'http://localhost:4000';
+let signupLoginForm = document.querySelector('#login-signup-form');
+let loginStatus = document.querySelector('#login-status');
+
+signupLoginForm.addEventListener('submit', (e) => signupLogin(e));
+
+let signupLogin = (e) => {
+  e.preventDefault();
+  let usernameValue = e.target[0].value;
+  let passwordValue = e.target[1].value;
+  let input = { username: usernameValue, password: passwordValue };
+  // no input
+  loginStatus.innerHTML =
+    usernameValue === ''
+      ? 'please enter a username'
+      : passwordValue === ''
+      ? 'please enter a password'
+      : '';
+  if (usernameValue === '' || passwordValue === '') return;
+  // signup
+  if (e.submitter.id === 'signup-btn') {
+    axios.post(`${localHost}/signup`, input).then((res) => {
+      loginStatus.innerHTML = res.data;
+    });
+  } else {
+    // login
+    axios.post(`${localHost}/login`, input).then((res) => {
+      loginStatus.innerHTML = res.data;
+    });
+  }
+};

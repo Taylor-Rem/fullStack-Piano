@@ -10,8 +10,38 @@ body {
   background-color: rgb(23, 23, 23);
   overflow: hidden;
 }
+#login-signup-form {
+  display: flex;
+  position: relative;
+  z-index: 2;
+  align-items: center;
+  justify-content: right;
+  margin-top: 2rem;
+}
+#login-signup-form > * {
+  margin-right: 1rem;
+}
+#login-signup-form > input {
+  font-size: 2rem;
+  width: 25rem;
+}
+#login-signup-form > label {
+  color: white;
+  font-size: 2rem;
+}
+#login-signup-form > button {
+  background-color: white;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+#login-status {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
 .body-con {
   position: relative;
+  margin-top: -5rem;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: repeat(12, 1fr);
