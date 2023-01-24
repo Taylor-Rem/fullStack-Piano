@@ -15,14 +15,13 @@
   </head>
   <body>
     <form action="login" id="login-signup-form">
-      <label for="username">Username:</label>
-      <input type="text" />
-      <label for="password">Password:</label>
-      <input type="text" />
+      <p id="alerts"></p>
+      <input type="text" placeholder="username" />
+      <input type="password" placeholder="password" />
       <button id="signup-btn">Sign Up</button>
       <button id="login-btn">Log In</button>
     </form>
-    <p id="login-status"></p>
+
     <div class="body-con">
       <div class="piano-ctrl-con">
         <div class="octave-change">
@@ -83,6 +82,38 @@
         </div>
       </div>
       <div class="piano-container"></div>
+      <div class="song-container">
+        <div class="song-save-container">
+          <form id="save-song-form" action="save-song">
+            <input type="text" placeholder="song name" />
+            <button>
+              <svg fill="white" width="24" height="24" viewBox="0 0 24 24">
+                <path
+                  d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
+                />
+              </svg>
+            </button>
+          </form>
+        </div>
+        <div id="song-select-container">
+          <form id="play-saved-song" action="play-saved-song">
+            <label for="songs">choose song</label>
+            <select name="songs" id="song-selection"></select>
+            <button id="saved-play">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="white"
+                viewBox="0 0 24 24"
+                class="w-6 h-6"
+              >
+                <path
+                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+                />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </body>
   <script

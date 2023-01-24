@@ -218,32 +218,37 @@ document.addEventListener('keyup', (e) => {
   keyPressTime[note] = Date.now() - keyPressTime[note];
 });
 
-document.querySelector('#play-btn').addEventListener('click', () => {
-  if (!recording) {
-    isPlaying = !isPlaying;
-    document.querySelector('#play-btn').innerHTML = isPlaying
-      ? '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6 stop"><path d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>'
-      : '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>';
-    if (isPlaying) {
-      for (let i = 0; i < noteArr.length; i++) {
-        let { time, note, held } = noteArr[i];
-        setTimeout(() => {
-          synth.triggerAttack(note);
-          changeColor(note, '#363636', '#dcdcdc');
-          setTimeout(() => {
-            synth.triggerRelease(note);
-            changeColor(note, 'Black', 'White');
-          }, held);
-        }, time);
-      }
-    }
+const playSong = (song) => {
+  let { time, note, held } = song;
+  setTimeout(() => {
+    synth.triggerAttack(note);
+    changeColor(note, '#363636', '#dcdcdc');
+    setTimeout(() => {
+      synth.triggerRelease(note);
+      changeColor(note, 'Black', 'White');
+    }, held);
+  }, time);
+};
+
+const playSvg = (btn, bool) => {
+  btn.innerHTML = bool
+    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6 stop"><path d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>';
+};
+
+let playBtn = document.querySelector('#play-btn');
+playBtn.addEventListener('click', () => {
+  isPlaying = !isPlaying;
+  playSvg(playBtn, isPlaying);
+  for (let i = 0; i < noteArr.length; i++) {
+    if (isPlaying) playSong(noteArr[i]);
   }
 });
 
 // BACKEND COMS
 let localHost = 'http://localhost:4000';
 let signupLoginForm = document.querySelector('#login-signup-form');
-let loginStatus = document.querySelector('#login-status');
+let alerts = document.querySelector('#alerts');
 
 signupLoginForm.addEventListener('submit', (e) => signupLogin(e));
 
@@ -253,7 +258,7 @@ let signupLogin = (e) => {
   let passwordValue = e.target[1].value;
   let input = { username: usernameValue, password: passwordValue };
   // no input
-  loginStatus.innerHTML =
+  alerts.innerHTML =
     usernameValue === ''
       ? 'please enter a username'
       : passwordValue === ''
@@ -263,12 +268,43 @@ let signupLogin = (e) => {
   // signup
   if (e.submitter.id === 'signup-btn') {
     axios.post(`${localHost}/signup`, input).then((res) => {
-      loginStatus.innerHTML = res.data;
+      alerts.innerHTML = res.data;
     });
   } else {
     // login
     axios.post(`${localHost}/login`, input).then((res) => {
-      loginStatus.innerHTML = res.data;
+      alerts.innerHTML = res.data;
     });
   }
 };
+
+let songSelect = document.querySelector('#song-selection');
+let songList = {};
+
+document.querySelector('#save-song-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  let songName = e.target[0].value;
+  if (noteArr.length > 0) {
+    songList[songName] = noteArr;
+    let song = document.createElement('option');
+    song.setAttribute('value', songName);
+    song.classList.add('song');
+    song.textContent = songName;
+    songSelect.appendChild(song);
+    updateDOM();
+  } else {
+    alerts.innerHTML = 'you must record a song!';
+  }
+});
+
+let playSavedSongForm = document.querySelector('#play-saved-song');
+let savedSongPlaying = false;
+playSavedSongForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  song = songList[e.target[0].value];
+  savedSongPlaying = !savedSongPlaying;
+  playSvg(document.querySelector('#saved-play'), savedSongPlaying);
+  for (let i = 0; i < song.length; i++) {
+    if (savedSongPlaying) playSong(song[i]);
+  }
+});

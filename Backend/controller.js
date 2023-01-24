@@ -35,9 +35,7 @@ module.exports = {
   createAccount: (req, res) => {
     let { username, password } = req.body;
     username = username.toLowerCase();
-    const salt = bcrypt.genSaltSync(5);
-    const hash = bcrypt.hashSync(password, salt);
-    let dbUser = '';
+    const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(5));
     sequelize
       .query(
         `
@@ -45,7 +43,7 @@ module.exports = {
       `
       )
       .then((dbRes) => {
-        if (JSON.stringify(dbRes[0]) === '[]') {
+        if (dbRes[0].length === 0) {
           sequelize.query(
             `
             INSERT INTO users(user_name, hash) VALUES('${username}', '${hash}')
@@ -66,6 +64,10 @@ module.exports = {
       `
       )
       .then((dbRes) => {
+        if (dbRes[0].length === 0) {
+          res.status(200).send(`username ${username} does not exist`);
+          return;
+        }
         if (bcrypt.compareSync(password, dbRes[0][0].hash)) {
           res.status(200).send(`logged in under username: ${username}`);
         } else {
