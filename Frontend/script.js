@@ -193,7 +193,6 @@ const startTimer = () => {
     clearInterval(timerId);
     startTime = null;
     time = 0;
-    console.log(noteArr);
   }
 };
 
@@ -218,6 +217,7 @@ document.addEventListener('keyup', (e) => {
   keyPressTime[note] = Date.now() - keyPressTime[note];
 });
 
+// song Play function
 const playSong = (song) => {
   let { time, note, held } = song;
   setTimeout(() => {
@@ -229,13 +229,13 @@ const playSong = (song) => {
     }, held);
   }, time);
 };
-
+// turns play into stop on svg
 const playSvg = (btn, bool) => {
   btn.innerHTML = bool
     ? '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6 stop"><path d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>'
     : '<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>';
 };
-
+// play temp memory song
 let playBtn = document.querySelector('#play-btn');
 playBtn.addEventListener('click', () => {
   isPlaying = !isPlaying;
@@ -251,6 +251,10 @@ let signupLoginForm = document.querySelector('#login-signup-form');
 let alerts = document.querySelector('#alerts');
 
 signupLoginForm.addEventListener('submit', (e) => signupLogin(e));
+loggedIn = false;
+let userId = 0;
+let accountSongs = {};
+let songSelect = document.querySelector('#song-selection');
 
 let signupLogin = (e) => {
   e.preventDefault();
@@ -273,38 +277,74 @@ let signupLogin = (e) => {
   } else {
     // login
     axios.post(`${localHost}/login`, input).then((res) => {
-      alerts.innerHTML = res.data;
+      if (typeof res.data === 'object') {
+        let { user_id, user_name } = res.data;
+        userId = user_id;
+        songSelect.innerHTML = '';
+        for (let i = 0; i < res.data.songs.length; i++) {
+          let { song, song_id, song_name } = res.data.songs[i];
+          accountSongs[song_name] = song;
+          song = JSON.parse(song);
+          addSongs(song_name, song);
+        }
+        alerts.innerHTML = `logged in as ${res.data.user_name}`;
+        loggedIn = true;
+      } else {
+        alerts.innerHTML = res.data;
+      }
     });
   }
 };
 
-let songSelect = document.querySelector('#song-selection');
 let songList = {};
-
+// save song to DB
 document.querySelector('#save-song-form').addEventListener('submit', (e) => {
   e.preventDefault();
   let songName = e.target[0].value;
-  if (noteArr.length > 0) {
-    songList[songName] = noteArr;
-    let song = document.createElement('option');
-    song.setAttribute('value', songName);
-    song.classList.add('song');
-    song.textContent = songName;
-    songSelect.appendChild(song);
-    updateDOM();
-  } else {
+  if (noteArr.length < 1) {
     alerts.innerHTML = 'you must record a song!';
+    return;
   }
+  let input = { songName: songName, song: noteArr, userId: userId };
+  if (loggedIn) {
+    axios.post(`${localHost}/songSave`, input).then((res) => {
+      alerts.innerHTML = `${res.data.songName} saved to database!`;
+    });
+  }
+  addSongs(songName, noteArr);
 });
-
+// add song/s to DOM
+const addSongs = (songName, song) => {
+  let songDom = document.createElement('option');
+  if (songName !== songDom.textContent) {
+    songList[songName] = song;
+    songDom.setAttribute('value', songName);
+    songDom.classList.add('song');
+    songDom.textContent = songName;
+    songSelect.appendChild(songDom);
+    updateDOM();
+  }
+};
+// playing song from DB
 let playSavedSongForm = document.querySelector('#play-saved-song');
 let savedSongPlaying = false;
 playSavedSongForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  song = songList[e.target[0].value];
-  savedSongPlaying = !savedSongPlaying;
-  playSvg(document.querySelector('#saved-play'), savedSongPlaying);
-  for (let i = 0; i < song.length; i++) {
-    if (savedSongPlaying) playSong(song[i]);
+  let songName = e.target[0].value;
+  if (e.submitter.id === 'saved-play') {
+    if (JSON.stringify(songList) === '{}') {
+      alerts.innerHTML = 'you must save a song';
+      return;
+    }
+    song = songList[songName];
+    savedSongPlaying = !savedSongPlaying;
+    playSvg(document.querySelector('#saved-play'), savedSongPlaying);
+    for (let i = 0; i < song.length; i++) {
+      if (savedSongPlaying) playSong(song[i]);
+    }
+  } else {
+    axios.delete(`${localHost}/deleteSong/${songName}`).then((res) => {
+      alerts.innerHTML = res.data;
+    });
   }
 });

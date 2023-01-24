@@ -25,8 +25,9 @@ module.exports = {
         );
         CREATE TABLE song (
           song_id SERIAL PRIMARY KEY,
-          users INT NOT NULL REFERENCES users(user_id),
-          song_name VARCHAR
+          user_id INT NOT NULL REFERENCES users(user_id),
+          song_name VARCHAR,
+          song VARCHAR
         );
       `
       )
@@ -60,7 +61,7 @@ module.exports = {
     sequelize
       .query(
         `
-      SELECT * FROM users WHERE user_name = '${username}'
+      SELECT * FROM users WHERE users.user_name = '${username}'
       `
       )
       .then((dbRes) => {
@@ -69,10 +70,44 @@ module.exports = {
           return;
         }
         if (bcrypt.compareSync(password, dbRes[0][0].hash)) {
-          res.status(200).send(`logged in under username: ${username}`);
+          sequelize
+            .query(
+              `
+            SELECT * FROM song
+            WHERE song.user_id = ${dbRes[0][0].user_id}
+            `
+            )
+            .then((dbRes2) => {
+              let obj = { ...dbRes[0][0], songs: dbRes2[0] };
+              delete obj.hash;
+              res.send(obj);
+            });
         } else {
           res.status(200).send('Wrong password. Please try again');
         }
+      });
+  },
+  songSave: (req, res) => {
+    let { songName, song, userId } = req.body;
+    song = JSON.stringify(song);
+    sequelize.query(
+      `
+      INSERT INTO song(song_name, song, user_id)
+      VALUES('${songName}', '${song}', ${userId})
+      `
+    );
+    res.status(200).send(req.body);
+  },
+  deleteSong: (req, res) => {
+    let { songName } = req.params;
+    sequelize
+      .query(
+        `
+      DELETE FROM song WHERE song_name = '${songName}'
+      `
+      )
+      .then((dbRes) => {
+        res.send(`deleted ${songName} from profile`);
       });
   },
 };
