@@ -270,7 +270,7 @@ let signupLogin = (e) => {
   if (usernameValue === '' || passwordValue === '') return;
   // signup
   if (e.submitter.id === 'signup-btn') {
-    axios.post(`${localHost}/signup`, input).then((res) => {
+    axios.post(`/signup`, input).then((res) => {
       alerts.innerHTML = res.data;
     });
   } else {
@@ -279,7 +279,7 @@ let signupLogin = (e) => {
 };
 // login
 const login = (input) => {
-  axios.post(`${localHost}/login`, input).then((res) => {
+  axios.post(`/login`, input).then((res) => {
     if (typeof res.data === 'object') {
       let { user_id, user_name } = res.data;
       userId = user_id;
@@ -308,7 +308,7 @@ document.querySelector('#save-song-form').addEventListener('submit', (e) => {
   }
   let input = { songName: songName, song: noteArr, userId: userId };
   if (loggedIn) {
-    axios.post(`${localHost}/songSave`, input).then((res) => {
+    axios.post(`/songSave`, input).then((res) => {
       alerts.innerHTML = `${res.data.songName} saved to database!`;
     });
   }
@@ -344,14 +344,14 @@ playSavedSongForm.addEventListener('submit', (e) => {
       if (savedSongPlaying) playSong(song[i]);
     }
   } else {
-    axios.delete(`${localHost}/deleteSong/${songName}`).then((res) => {
+    axios.delete(`/deleteSong/${songName}`).then((res) => {
       alerts.innerHTML = res.data;
     });
   }
 });
 
 document.getElementById('cat').addEventListener('click', () => {
-  axios.get(`${localHost}/getCat`).then((res) => {
+  axios.get(`/getCat`).then((res) => {
     document.getElementById('cat-img').classList.toggle(res.data);
   });
 });
