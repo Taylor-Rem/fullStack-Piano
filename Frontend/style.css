@@ -11,6 +11,9 @@ body {
   overflow: hidden;
   background-color: #111;
 }
+#cat {
+  position: absolute;
+}
 svg {
   width: 5rem;
   height: 5rem;
@@ -142,4 +145,15 @@ p {
 }
 #song-selection {
   color: black;
+}
+.hidden {
+  display: none;
+}
+#cat-img {
+  width: 70vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }

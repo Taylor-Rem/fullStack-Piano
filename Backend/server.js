@@ -11,6 +11,7 @@ const {
   login,
   songSave,
   deleteSong,
+  getCat,
 } = require('./controller.js');
 
 app.use(express.static(`${__dirname}/../Frontend`));
@@ -20,5 +21,6 @@ app.post('/signup', createAccount);
 app.post('/login', login);
 app.post('/songSave', songSave);
 app.delete('/deleteSong/:songName', deleteSong);
+app.get('/getCat', getCat);
 
 app.listen(SERVER_PORT, () => console.log(`up on ${SERVER_PORT}`));

@@ -110,4 +110,7 @@ module.exports = {
         res.send(`deleted ${songName} from profile`);
       });
   },
+  getCat: (req, res) => {
+    res.send('hidden');
+  },
 };

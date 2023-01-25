@@ -253,7 +253,6 @@ let alerts = document.querySelector('#alerts');
 signupLoginForm.addEventListener('submit', (e) => signupLogin(e));
 loggedIn = false;
 let userId = 0;
-let accountSongs = {};
 let songSelect = document.querySelector('#song-selection');
 
 let signupLogin = (e) => {
@@ -275,25 +274,27 @@ let signupLogin = (e) => {
       alerts.innerHTML = res.data;
     });
   } else {
-    // login
-    axios.post(`${localHost}/login`, input).then((res) => {
-      if (typeof res.data === 'object') {
-        let { user_id, user_name } = res.data;
-        userId = user_id;
-        songSelect.innerHTML = '';
-        for (let i = 0; i < res.data.songs.length; i++) {
-          let { song, song_id, song_name } = res.data.songs[i];
-          accountSongs[song_name] = song;
-          song = JSON.parse(song);
-          addSongs(song_name, song);
-        }
-        alerts.innerHTML = `logged in as ${res.data.user_name}`;
-        loggedIn = true;
-      } else {
-        alerts.innerHTML = res.data;
-      }
-    });
+    login(input);
   }
+};
+// login
+const login = (input) => {
+  axios.post(`${localHost}/login`, input).then((res) => {
+    if (typeof res.data === 'object') {
+      let { user_id, user_name } = res.data;
+      userId = user_id;
+      songSelect.innerHTML = '';
+      for (let i = 0; i < res.data.songs.length; i++) {
+        let { song, song_id, song_name } = res.data.songs[i];
+        song = JSON.parse(song);
+        addSongs(song_name, song);
+      }
+      alerts.innerHTML = `logged in as ${res.data.user_name}`;
+      loggedIn = true;
+    } else {
+      alerts.innerHTML = res.data;
+    }
+  });
 };
 
 let songList = {};
@@ -347,4 +348,10 @@ playSavedSongForm.addEventListener('submit', (e) => {
       alerts.innerHTML = res.data;
     });
   }
+});
+
+document.getElementById('cat').addEventListener('click', () => {
+  axios.get(`${localHost}/getCat`).then((res) => {
+    document.getElementById('cat-img').classList.toggle(res.data);
+  });
 });
